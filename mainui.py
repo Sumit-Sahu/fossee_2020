@@ -24,6 +24,8 @@ class GraphicsView(QGraphicsView):
         if action == deleteAction:
             for item in list:
                 scene.removeItem(item)
+        if action == exitAction:
+            window.close()
 
     def wheelEvent(self, event):
         factor = 1.25 ** (-event.angleDelta().y()/ 240.0)
