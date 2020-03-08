@@ -39,7 +39,7 @@ class Window(QMainWindow):
         self.left = 900
         self.width = 1000
         self.height = 800
-        self.title = "Create Circles"
+        self.title = "Circles"
         self.InitWindow()
 
         self.graphicView = GraphicsView(self)
@@ -48,7 +48,8 @@ class Window(QMainWindow):
 
 
         self.graphicView.setScene(self.scene)
-        self.graphicView.setGeometry(0, 25, 1000, 825)
+        # self.graphicView.setGeometry(0, 25, 1000, 825)
+        self.setCentralWidget(self.graphicView)
 
 
     def CreateMenu(self):
@@ -58,12 +59,13 @@ class Window(QMainWindow):
         mainMenu.addAction(self.adAction)
         self.adAction.triggered.connect(lambda: self.drawCircle())
 
-        generate_reportAction =QAction('Generate Report' ,self)
-        mainMenu.addAction(generate_reportAction)
+        self.generate_reportAction =QAction('Generate Report' ,self)
+        mainMenu.addAction(self.generate_reportAction)
 
-        saveAction = QAction('Save', self)
-        mainMenu.addAction(saveAction)
-        # saveAction.triggered.connect(self.save_image)
+        self.saveAction = QAction('Save', self)
+        mainMenu.addAction(self.saveAction)
+        self.saveAction.triggered.connect(self.save_image)
+            
 
     def drawCircle(self):
         circle=Circle(self)
@@ -78,6 +80,12 @@ class Window(QMainWindow):
     # def mousePressEvent(self, QMouseEvent):
     #     # if QMouseEvent.button() == Qt.RightButton:
     #     print("clicked right")
+
+    def save_image(self):
+        fileName = QFileDialog.getSaveFileName(self,'caption', "image.png", '*.png')
+        pixMap=QPixmap()
+        pixMap=self.graphicView.grab(self.graphicView.sceneRect().toRect())
+        pixMap.save(fileName[0],'PNG')    
 
 
 
