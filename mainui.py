@@ -2,19 +2,21 @@ import sys, random
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QFileDialog, QLineEdit, QGraphicsView, \
-    QMenu, QGraphicsScene, QGraphicsView, QGraphicsItem, QMenu, QGraphicsEllipseItem
+    QMenu, QGraphicsScene, QGraphicsView, QGraphicsItem, QMenu, QGraphicsEllipseItem, QGraphicsLineItem, QAction, \
+    QToolButton, QButtonGroup
 from PyQt5.QtGui import QPainter, QPen, QImage, QPixmap, QStaticText, QColor, QCursor, QBrush, QIcon, QTransform
-from PyQt5.QtCore import Qt, QRect, QRectF, QPoint, QPointF
+from PyQt5.QtCore import Qt, QRect, QRectF, QPoint, QPointF, QLineF
+
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-
 
 class Circle(QGraphicsEllipseItem):
     def __init__(self, radius, parent=None):
         position = QtCore.QPoint(*random.choices(range(800), k=2))
         x_coordinate, y_coordinate = position.x(), position.y()
         QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * radius, 2 * radius), parent=parent)
+        self.setZValue(1)
         # self.scene.moveCircle.connect(self.mouseMoveEvent)
         self.line = None
         self.color = QColor(*random.choices(range(256), k=3))
@@ -22,9 +24,6 @@ class Circle(QGraphicsEllipseItem):
 
         self.connecting_lines = []
         self.setFlags(QGraphicsItem.ItemIsMovable)
-
-    def connect(self):
-        pass
 
     def contextMenuEvent(self, event):
         contextMenu = QMenu()
@@ -39,25 +38,7 @@ class Circle(QGraphicsEllipseItem):
         if action == connectAction:
             self.connect()
 
-    def add_connecting_line(self):
-        pass
-
-    def add_line(self, circle):
-        pass
-
-    # def addLine(self, line, isPoint1):
-    #     self.line = line
-    #     self.isP1 = isPoint1
-
-    # def move_toward_circle(self):
-    #     x = self.x()
-    #     y = self.y()
-    #     newCenterPos = QPointF(x, y)
-    #     p1 = newCenterPos if self.isP1 else self.line.line().p1()
-    #     p2 = self.line.line().p2() if self.isP1 else newCenterPos
-    #     self.line.setLine(p1.x(), p1.y(), p2.x(), p2.y())
-
-    def draw_on_canvas(self, scene):
+    def addOnCanvas(self, scene):
         scene.addItem(self)
         textLabel = scene.addWidget(QLineEdit('cirA'))
         textLabel.setParentItem(self)
@@ -71,40 +52,43 @@ class Circle(QGraphicsEllipseItem):
         if CanvasScene.myMode == CanvasScene.InsertLine:
             item = self
             if type(item) == Circle:
-                self.line = QGraphicsLineItem(
-                    QLineF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2,
-                           item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2,
-                           mouseEvent.scenePos().x(), mouseEvent.scenePos().y()))
+                startPoint = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
+                             item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
+                endPoint = mouseEvent.scenePos()
+                self.line = ConnectingLine(startPoint, endPoint)
+                self.line.setStartCircle(self)
+                # self.line = QGraphicsLineItem(
+                #     QLineF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
+                #            item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0,
+                #            mouseEvent.scenePos().x(), mouseEvent.scenePos().y()))
 
-                self.line.setPen(QPen(Qt.black, 2))
+                # self.line.setPen(QPen(Qt.black, 2))
                 self.scene().addItem(self.line)
-                self.line.setZValue(-1.0)
         super().mousePressEvent(mouseEvent)
 
     def mouseMoveEvent(self, mouseEvent):
-        if self.connecting_lines:
-            self.move_toward_circle()
         if CanvasScene.myMode == CanvasScene.InsertLine and self.line:
-            newLine = QLineF(self.line.line().p1(), mouseEvent.scenePos())
-            self.line.setLine(newLine)
+            # self.line.setEndPoint(mouseEvent.scenePos())
+            # newLine = QLineF(self.line.line().p1(), )
+            # self.line.setLine(newLine)
+            print(mouseEvent.scenePos)
+            self.line.adjust(mouseEvent.scenePos())
         if CanvasScene.myMode == CanvasScene.MoveItem:
+            # emit signal with mouseEvent
             super().mouseMoveEvent(mouseEvent)
 
     def mouseReleaseEvent(self, mouseEvent):
         if CanvasScene.myMode == CanvasScene.InsertLine and self.line:
             item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
-            print(item, self)
             if type(item) == Circle and item != self:
-                point2=QPoint(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2,
-                           item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2)
-                newLine = QLineF(self.line.line().p1(), point2)
-                self.line.setLine(newLine)
 
+                point2 = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
+                                 item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
+                self.line.adjust(point2)
+                self.line.setEndCircle(item)
             else:
                 self.scene().removeItem(self.line)
 
-
-        # self.removeItem(self.line)
         self.line = None
         super(Circle, self).mouseReleaseEvent(mouseEvent)
 
@@ -176,6 +160,7 @@ class Window(QMainWindow):
 
         self.view = QGraphicsView(self.scene)
         self.setCentralWidget(self.view)
+        # self.view.fitInView(self.scene.sceneRect())
 
     def pointerGroupClicked(self, i):
         self.scene.setMode(self.connectionTypeGroup.checkedId())
@@ -214,12 +199,12 @@ class Window(QMainWindow):
     def drawCircle(self):
         radius = 50
         circle = Circle(radius)
-        circle.draw_on_canvas(self.scene)
+        circle.addOnCanvas(self.scene)
 
     def save_image(self):
         fileName = QFileDialog.getSaveFileName(self, 'caption', "image.png", '*.png')
         pixmap = QPixmap()
-        pixmap = self.graphicView.grab(self.rect())
+        pixmap = self.view.grab(self.rect())
         pixmap.save(fileName[0], 'PNG')
 
 
