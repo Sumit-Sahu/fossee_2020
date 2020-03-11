@@ -67,18 +67,18 @@ class Circle(QGraphicsEllipseItem):
     def mousePressEvent(self, mouseEvent):
         if (mouseEvent.button() != Qt.LeftButton):
             return
-        print(CanvasScene.myMode, CanvasScene.InsertLine, CanvasScene.MoveItem)
-        if CanvasScene.myMode == CanvasScene.InsertLine:
-            item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
-            print(item)
-            if item :
-                self.line = QGraphicsLineItem(QLineF(item.boundingRect().x()+item.boundingRect().width()/2,
-                                                     item.boundingRect().y()+item.boundingRect().height()/2,
-                                              mouseEvent.scenePos().x(), mouseEvent.scenePos().y()))
 
+        if CanvasScene.myMode == CanvasScene.InsertLine:
+            item = self
+            if type(item) == Circle:
+                self.line = QGraphicsLineItem(
+                    QLineF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2,
+                           item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2,
+                           mouseEvent.scenePos().x(), mouseEvent.scenePos().y()))
 
                 self.line.setPen(QPen(Qt.black, 2))
                 self.scene().addItem(self.line)
+                self.line.setZValue(-1.0)
         super().mousePressEvent(mouseEvent)
 
     def mouseMoveEvent(self, mouseEvent):
@@ -88,15 +88,21 @@ class Circle(QGraphicsEllipseItem):
             newLine = QLineF(self.line.line().p1(), mouseEvent.scenePos())
             self.line.setLine(newLine)
         if CanvasScene.myMode == CanvasScene.MoveItem:
-            print(self.rect())
             super().mouseMoveEvent(mouseEvent)
-            self.update()
-            print(self.rect())
-            print(self.scene().sceneRect())
 
     def mouseReleaseEvent(self, mouseEvent):
         if CanvasScene.myMode == CanvasScene.InsertLine and self.line:
             item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
+            print(item, self)
+            if type(item) == Circle and item != self:
+                point2=QPoint(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2,
+                           item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2)
+                newLine = QLineF(self.line.line().p1(), point2)
+                self.line.setLine(newLine)
+
+            else:
+                self.scene().removeItem(self.line)
+
 
         # self.removeItem(self.line)
         self.line = None
