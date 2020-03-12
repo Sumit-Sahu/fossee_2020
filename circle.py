@@ -29,7 +29,7 @@ class Circle(QGraphicsEllipseItem):
 
         self.setFlags(QGraphicsItem.ItemIsMovable)
 
-        self.connectlines = {}
+        self.connectedCircle = {}
 
     def setMode(self, mode):
         Circle.myMode = mode
@@ -41,6 +41,9 @@ class Circle(QGraphicsEllipseItem):
         # connectAction = contextMenu.addAction("Connect With")
         action = contextMenu.exec_(event.screenPos())
         if action == deleteAction:
+            for circle, line in self.connectedCircle.items():
+                self.scene().removeItem(line)
+                del circle.connectedCircle[self]
 
             self.scene().removeItem(self)
         if action == quitAction:
@@ -74,19 +77,19 @@ class Circle(QGraphicsEllipseItem):
             self.line.updateLine(mouseEvent.scenePos())
         if Circle.myMode == Circle.MoveItem:
             super().mouseMoveEvent(mouseEvent)
-            for line in self.connectlines.values() :
+            for line in self.connectedCircle.values():
                 line.updateLine(mouseEvent.scenePos())
 
     def mouseReleaseEvent(self, mouseEvent):
         if Circle.myMode == Circle.InsertLine and self.line:
             item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
 
-            if type(item) == Circle and item != self and not item in self.connectlines:
+            if type(item) == Circle and item != self and not item in self.connectedCircle:
                 point = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
                                 item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
                 self.line.updateLine(point)
-                self.connectlines[item]=self.line
-                item.connectlines[self]=self.line
+                self.connectedCircle[item] = self.line
+                item.connectedCircle[self] = self.line
                 self.line.setStartCircle(self)
                 self.line.setEndCircle(item)
             else:
