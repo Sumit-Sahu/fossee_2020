@@ -1,18 +1,15 @@
-import sys, random
+import sys
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QFileDialog, QLineEdit, QGraphicsView, \
-    QMenu, QGraphicsScene, QGraphicsView, QGraphicsItem, QMenu, QGraphicsEllipseItem
-from PyQt5.QtGui import QPainter, QPen, QImage, QPixmap, QStaticText, QColor, QCursor, QBrush, QIcon, QTransform
-from PyQt5.QtCore import Qt, QRect, QRectF, QPoint, QPointF
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QGraphicsPathItem, QGraphicsLineItem, QApplication, QGraphicsView, QGraphicsScene
+from PyQt5.QtCore import Qt, QLine, pyqtSignal, QPoint, QPointF
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 
 class ConnectingLine(QGraphicsLineItem):
-    def __init__(self, startPoint, endPoint,parent=None):
-        QGraphicsLineItem.__init__(self,startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y(),parent=parent)
-        print('s')
+    updateLine = pyqtSignal()
+
+    def __init__(self, startPoint, endPoint, parent=None):
+        QGraphicsLineItem.__init__(self, startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y(), parent=parent)
         self.startPoint = startPoint
         self.endPoint = endPoint
         self.startCircle = None
@@ -32,14 +29,16 @@ class ConnectingLine(QGraphicsLineItem):
     def setEndCircle(self, endCircle):
         self.endCircle = endCircle
 
-    def adjust(self, point):
+    def updateLine(self, point):
         if self.startCircle and self.endCircle:
             # line = QLineF(self.mapFromItem(self.startCircle, 0, 0),
             #               self.mapFromItem(self.endCircle, 0, 0))
-
-            self.startPoint = self.mapFromItem(self.startCircle, 0, 0)
-            self.endPoint = self.mapFromItem(self.endCircle, 0, 0)
+            item=self.startCircle
+            self.startPoint = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
+                             item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
+            item=self.endCircle
+            self.endPoint = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
+                             item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
         else:
-            print('then',point)
             self.endPoint = point
-        self.setLine(self.startPoint.x(), self.startPoint.y(),self.endPoint.x(),self.endPoint.y())
+        self.setLine(self.startPoint.x(), self.startPoint.y(), self.endPoint.x(), self.endPoint.y())
