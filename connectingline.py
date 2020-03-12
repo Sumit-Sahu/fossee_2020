@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QLine, pyqtSignal, QPoint, QPointF
 
 
 class ConnectingLine(QGraphicsLineItem):
-    updateLine = pyqtSignal()
+    updateLine = pyqtSignal(QPointF)
 
     def __init__(self, startPoint, endPoint, parent=None):
         QGraphicsLineItem.__init__(self, startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y(), parent=parent)

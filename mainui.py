@@ -11,7 +11,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from circle import Circle
-from connectinglines import ConnectingLine
+from connectingline import ConnectingLine
 
 
 

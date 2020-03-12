@@ -10,7 +10,8 @@ from PyQt5.QtCore import Qt, QRect, QRectF, QPoint, QPointF, QLineF
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from connectinglines import ConnectingLine
+from connectingline import ConnectingLine
+
 
 class Circle(QGraphicsEllipseItem):
     MoveItem, InsertLine = 1, 2
@@ -28,7 +29,7 @@ class Circle(QGraphicsEllipseItem):
 
         self.setFlags(QGraphicsItem.ItemIsMovable)
 
-        self.connectlines = []
+        self.connectlines = {}
 
     def setMode(self, mode):
         Circle.myMode = mode
@@ -37,14 +38,15 @@ class Circle(QGraphicsEllipseItem):
         contextMenu = QMenu()
         deleteAction = contextMenu.addAction("Delete")
         quitAction = contextMenu.addAction("Exit")
-        connectAction = contextMenu.addAction("Connect With")
+        # connectAction = contextMenu.addAction("Connect With")
         action = contextMenu.exec_(event.screenPos())
         if action == deleteAction:
+
             self.scene().removeItem(self)
         if action == quitAction:
             self.window().close()
-        if action == connectAction:
-            self.connect()
+        # if action == connectAction:
+        #     self.connect()
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
@@ -54,7 +56,7 @@ class Circle(QGraphicsEllipseItem):
             QRectF(self.rect().x() + self.rect().width() / 4, self.rect().y() - self.pen().width() - 10, 50, 10))
 
     def mousePressEvent(self, mouseEvent):
-        if (mouseEvent.button() != Qt.LeftButton):
+        if mouseEvent.button() != Qt.LeftButton:
             return
 
         if Circle.myMode == Circle.InsertLine:
@@ -64,7 +66,6 @@ class Circle(QGraphicsEllipseItem):
                                      item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
                 endPoint = mouseEvent.scenePos()
                 self.line = ConnectingLine(startPoint, endPoint)
-                self.line.setStartCircle(self)
                 self.scene().addItem(self.line)
         super().mousePressEvent(mouseEvent)
 
@@ -73,19 +74,20 @@ class Circle(QGraphicsEllipseItem):
             self.line.updateLine(mouseEvent.scenePos())
         if Circle.myMode == Circle.MoveItem:
             super().mouseMoveEvent(mouseEvent)
-            for line in self.connectlines:
+            for line in self.connectlines.values() :
                 line.updateLine(mouseEvent.scenePos())
 
     def mouseReleaseEvent(self, mouseEvent):
         if Circle.myMode == Circle.InsertLine and self.line:
             item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
-            if type(item) == Circle and item != self:
 
+            if type(item) == Circle and item != self and not item in self.connectlines:
                 point = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
                                 item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
                 self.line.updateLine(point)
-                self.connectlines.append(self.line)
-                item.connectlines.append(self.line)
+                self.connectlines[item]=self.line
+                item.connectlines[self]=self.line
+                self.line.setStartCircle(self)
                 self.line.setEndCircle(item)
             else:
                 self.scene().removeItem(self.line)
