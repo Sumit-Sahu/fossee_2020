@@ -14,12 +14,11 @@ from circle import Circle
 from connectingline import ConnectingLine
 
 
-
-
 class CanvasScene(QGraphicsScene):
 
     def __init__(self, parent=None):
         QGraphicsScene.__init__(self, parent)
+
 
 class Window(QMainWindow):
     def __init__(self):
@@ -48,16 +47,21 @@ class Window(QMainWindow):
         Circle.myMode = self.connectionTypeGroup.checkedId()
 
     def createActions(self):
-        self.adAction = QAction("Add", self, shortcut="Ctrl+N", statusTip="Add a new Circle")
-        self.adAction.triggered.connect(lambda: self.drawCircle())
-        self.generateReportAction = QAction("Generate Report", self, shortcut="Ctrl+G", statusTip="Pdf Report")
-        self.saveAction = QAction(
-            QIcon('images/bringtofront.png'), "Save",
-            self, shortcut="Ctrl+S", statusTip="Save as Image")
+        self.addAction = QAction(QIcon('images/bringtofront.png'),
+                                 "Add", self, shortcut="Ctrl+N")
+        self.addAction.triggered.connect(self.drawCircle)
+
+        self.generateReportAction = QAction(QIcon('images/bringtofront.png'),
+                                            "Generate Report", self, shortcut="Ctrl+G")
+        self.generateReportAction.triggered.connect(self.drawCircle)
+
+        self.saveAction = QAction(QIcon('images/bringtofront.png'),
+                                  "Save", self, shortcut="Ctrl+G")
+        self.saveAction.triggered.connect(self.saveImage)
 
     def createToolbars(self):
         self.editToolBar = self.addToolBar("Edit")
-        self.editToolBar.addAction(self.adAction)
+        self.editToolBar.addAction(self.addAction)
         self.editToolBar.addAction(self.generateReportAction)
         self.editToolBar.addAction(self.saveAction)
 
@@ -79,15 +83,20 @@ class Window(QMainWindow):
         self.lineToolbar.addWidget(pointerButton)
 
     def drawCircle(self):
-        radius = 50
-        circle = Circle(radius)
-        circle.addOnCanvas(self.scene)
+        circle = Circle()
+        self.scene.addItem(circle)
+        circle.textLabel = self.scene.addWidget(QLineEdit('cirA'))
+        circle.textLabel.setParentItem(circle)
+        circle.textLabel.setGeometry(QRectF(circle.rect().x() + circle.rect().width() / 4,
+                                            circle.rect().y() - circle.pen().width() - 20,
+                                            50, 20))
 
-    def save_image(self):
-        fileName = QFileDialog.getSaveFileName(self, 'caption', "image.png", '*.png')
+
+    def saveImage(self):
+        fileName,_ = QFileDialog.getSaveFileName(self, 'Save file', "image.png", '*.png')
         pixmap = QPixmap()
-        pixmap = self.view.grab(self.rect())
-        pixmap.save(fileName[0], 'PNG')
+        pixmap = self.view.grab()
+        pixmap.save(fileName, 'PNG')
 
 
 def main():

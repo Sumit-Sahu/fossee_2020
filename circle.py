@@ -16,16 +16,18 @@ from connectingline import ConnectingLine
 class Circle(QGraphicsEllipseItem):
     MoveItem, InsertLine = 1, 2
     myMode = MoveItem
+    radius = 50
 
-    def __init__(self, radius, parent=None):
+    def __init__(self, parent=None):
         position = QtCore.QPoint(*random.choices(range(800), k=2))
         x_coordinate, y_coordinate = position.x(), position.y()
-        QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * radius, 2 * radius), parent=parent)
+        QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * Circle.radius, 2 * Circle.radius), parent=parent)
         self.setZValue(1)
-        # self.scene.moveCircle.connect(self.mouseMoveEvent)
+        self.textLabel = None
         self.line = None
         self.color = QColor(*random.choices(range(256), k=3))
         self.setPen(QPen(self.color, 4, Qt.SolidLine))
+
 
         self.setFlags(QGraphicsItem.ItemIsMovable)
 
@@ -53,9 +55,9 @@ class Circle(QGraphicsEllipseItem):
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
-        textLabel = scene.addWidget(QLineEdit('cirA'))
-        textLabel.setParentItem(self)
-        textLabel.setGeometry(
+        self.textLabel = scene.addWidget(QLineEdit('cirA'))
+        self.textLabel.setParentItem(self)
+        self.textLabel.setGeometry(
             QRectF(self.rect().x() + self.rect().width() / 4, self.rect().y() - self.pen().width() - 10, 50, 10))
 
     def mousePressEvent(self, mouseEvent):
