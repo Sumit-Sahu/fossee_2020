@@ -23,16 +23,11 @@ class CanvasScene(QGraphicsScene):
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        # self.top = 100
-        # self.left = 900
-        # self.width = 1000
-        # self.height = 800
         self.title = "Create Circles"
         self.InitWindow()
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
-        # self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.scene = CanvasScene()
         self.scene.setSceneRect(QRectF(0, 0, 1000, 1000))
@@ -57,7 +52,7 @@ class Window(QMainWindow):
 
         self.saveAction = QAction(QIcon('images/bringtofront.png'),
                                   "Save", self, shortcut="Ctrl+G")
-        self.saveAction.triggered.connect(self.saveImage)
+        self.saveAction.triggered.connect(self.saveAsPng)
 
     def createToolbars(self):
         self.editToolBar = self.addToolBar("Edit")
@@ -84,15 +79,16 @@ class Window(QMainWindow):
 
     def drawCircle(self):
         circle = Circle()
-        self.scene.addItem(circle)
-        circle.textLabel = self.scene.addWidget(QLineEdit('cirA'))
-        circle.textLabel.setParentItem(circle)
-        circle.textLabel.setGeometry(QRectF(circle.rect().x() + circle.rect().width() / 4,
-                                            circle.rect().y() - circle.pen().width() - 20,
-                                            50, 20))
+        circle.addOnCanvas(self.scene)
+        # self.scene.addItem(circle)
+        # circle.textLabel = self.scene.addWidget(QLineEdit('cirA'))
+        # circle.textLabel.setParentItem(circle)
+        # circle.textLabel.setGeometry(QRectF(circle.rect().x() + circle.rect().width() / 4,
+        #                                     circle.rect().y() - circle.pen().width() - 20,
+        #                                     50, 20))
 
 
-    def saveImage(self):
+    def saveAsPng(self):
         fileName,_ = QFileDialog.getSaveFileName(self, 'Save file', "image.png", '*.png')
         pixmap = QPixmap()
         pixmap = self.view.grab()
