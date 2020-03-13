@@ -21,13 +21,16 @@ class Circle(QGraphicsEllipseItem):
     def __init__(self, parent=None):
         position = QtCore.QPoint(*random.choices(range(800), k=2))
         x_coordinate, y_coordinate = position.x(), position.y()
-        QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * Circle.radius, 2 * Circle.radius), parent=parent)
+        QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * Circle.radius, 2 * Circle.radius),
+                                      parent=parent)
         self.setZValue(1)
         self.textLabel = None
         self.line = None
         self.color = QColor(*random.choices(range(256), k=3))
         self.setPen(QPen(self.color, 4, Qt.SolidLine))
-
+        self.textLabel = QGraphicsProxyWidget()
+        self.textLabel.setWidget(QLineEdit('cirA'))
+        self.textLabel.setParentItem(self)
 
         self.setFlags(QGraphicsItem.ItemIsMovable)
 
@@ -55,10 +58,10 @@ class Circle(QGraphicsEllipseItem):
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
-        self.textLabel = scene.addWidget(QLineEdit('cirA'))
-        self.textLabel.setParentItem(self)
-        self.textLabel.setGeometry(
-            QRectF(self.rect().x() + self.rect().width() / 4, self.rect().y() - self.pen().width() - 10, 50, 10))
+        scene.addItem(self.textLabel)
+        self.textLabel.setGeometry(QRectF(self.rect().x() + self.rect().width() / 4,
+                                          self.rect().y() - self.pen().width() - 20,
+                                          50, 20))
 
     def mousePressEvent(self, mouseEvent):
         if mouseEvent.button() != Qt.LeftButton:
@@ -71,7 +74,8 @@ class Circle(QGraphicsEllipseItem):
                                      item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
                 endPoint = mouseEvent.scenePos()
                 self.line = ConnectingLine(startPoint, endPoint)
-                self.scene().addItem(self.line)
+                self.line.addOnCanvas(self.scene())
+                # self.scene().addItem(self.line)
         super().mousePressEvent(mouseEvent)
 
     def mouseMoveEvent(self, mouseEvent):
@@ -86,7 +90,7 @@ class Circle(QGraphicsEllipseItem):
         if Circle.myMode == Circle.InsertLine and self.line:
             item = self.scene().itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), self.transform())
 
-            if type(item) == Circle and item != self and not item in self.connectedCircle:
+            if type(item) == Circle and item != self and item not in self.connectedCircle:
                 point = QPointF(item.sceneBoundingRect().x() + item.sceneBoundingRect().width() / 2.0,
                                 item.sceneBoundingRect().y() + item.sceneBoundingRect().height() / 2.0)
                 self.line.updateLine(point)
@@ -94,6 +98,7 @@ class Circle(QGraphicsEllipseItem):
                 item.connectedCircle[self] = self.line
                 self.line.setStartCircle(self)
                 self.line.setEndCircle(item)
+
             else:
                 self.scene().removeItem(self.line)
 
