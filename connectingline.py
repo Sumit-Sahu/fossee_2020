@@ -15,9 +15,10 @@ class ConnectingLine(QGraphicsLineItem):
         self.endPoint = endPoint
         self.startCircle = None
         self.endCircle = None
-        self.textLabel = QGraphicsProxyWidget()
-        self.textLabel.setWidget(QLineEdit('CON1'))
-        self.textLabel.setParentItem(self)
+        self.textLabel = QLineEdit('CON1')
+        self.textLabelProxy = QGraphicsProxyWidget()
+        self.textLabelProxy.setWidget(self.textLabel)
+        self.textLabelProxy.setParentItem(self)
 
         self.setPen(QPen(Qt.black, 4, Qt.SolidLine))
 
@@ -45,10 +46,10 @@ class ConnectingLine(QGraphicsLineItem):
             self.endPoint = point
 
         self.setLine(self.startPoint.x(), self.startPoint.y(), self.endPoint.x(), self.endPoint.y())
-        self.textLabel.setGeometry(QRectF(self.boundingRect().x() + self.boundingRect().width() / 2,
-                                          self.boundingRect().y() + self.boundingRect().height() / 2,
-                                          50, 20))
+        self.textLabelProxy.setGeometry(QRectF(self.boundingRect().x() + self.boundingRect().width() / 2,
+                                               self.boundingRect().y() + self.boundingRect().height() / 2,
+                                               50, 20))
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
-        scene.addItem(self.textLabel)
+        scene.addItem(self.textLabelProxy)

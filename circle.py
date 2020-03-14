@@ -24,16 +24,14 @@ class Circle(QGraphicsEllipseItem):
         QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * Circle.radius, 2 * Circle.radius),
                                       parent=parent)
         self.setZValue(1)
-        self.textLabel = None
         self.line = None
         self.color = QColor(*random.choices(range(256), k=3))
         self.setPen(QPen(self.color, 4, Qt.SolidLine))
-        self.textLabel = QGraphicsProxyWidget()
-        self.textLabel.setWidget(QLineEdit('cirA'))
-        self.textLabel.setParentItem(self)
-
+        self.textLabel=QLineEdit('cirA')
+        self.textLabelProxy = QGraphicsProxyWidget()
+        self.textLabelProxy.setWidget(self.textLabel)
+        self.textLabelProxy.setParentItem(self)
         self.setFlags(QGraphicsItem.ItemIsMovable)
-
         self.connectedCircle = {}
 
     def setMode(self, mode):
@@ -58,10 +56,10 @@ class Circle(QGraphicsEllipseItem):
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
-        scene.addItem(self.textLabel)
-        self.textLabel.setGeometry(QRectF(self.rect().x() + self.rect().width() / 4,
-                                          self.rect().y() - self.pen().width() - 20,
-                                          50, 20))
+        scene.addItem(self.textLabelProxy)
+        self.textLabelProxy.setGeometry(QRectF(self.rect().x() + self.rect().width() / 4,
+                                               self.rect().y() - self.pen().width() - 20,
+                                               50, 20))
 
     def mousePressEvent(self, mouseEvent):
         if mouseEvent.button() != Qt.LeftButton:
