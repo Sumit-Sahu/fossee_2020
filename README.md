@@ -1,5 +1,8 @@
 # fossee_2020
-A PyQt5 based desktop application to draw a network of circles .
+A PyQt5 based desktop application to draw a network of circles .<br/>
+yaksh.fossee.in<br/>
+   -username: `sumits`<br/>
+   -email: `sumiiitjsahu@gmail.com`
 
 
 # Requirements
