@@ -3,7 +3,7 @@ A PyQt5 based desktop application to draw a network of circles .
 
 
 # Requirements
-1. Download this repository using https://github.com/Sumit-Sahu/fossee_2020.git 
+1. Download this repository using `git clone https://github.com/Sumit-Sahu/fossee_2020.git` 
 2. Required packages :- <br/>
    - [PyQt5](https://pypi.org/project/PyQt5/)<br/>
    - [reportlab](https://pypi.org/project/reportlab/)
