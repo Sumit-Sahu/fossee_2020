@@ -63,6 +63,10 @@ class Canvas(QGraphicsScene):
                     self.lines.append(line)
 
         super().mousePressEvent(mouseEvent)
+        if Canvas.myMode == Canvas.InsertLine:
+            circles = self.selectedItems()
+            for circle in circles:
+                circle.setSelected(False)
 
     def mouseMoveEvent(self, mouseEvent):
         if Canvas.myMode == Canvas.InsertLine and self.lines:
@@ -100,6 +104,11 @@ class Canvas(QGraphicsScene):
                     line.removeFromCanvas()
             item.clearFocus()
 
+        super(Canvas, self).mouseReleaseEvent(mouseEvent)
+        if Canvas.myMode == Canvas.InsertLine and self.circles:
+            circles = self.selectedItems()
+            for circle in circles:
+                circle.setSelected(False)
+
         self.lines.clear()
         self.circles.clear()
-        super(Canvas, self).mouseReleaseEvent(mouseEvent)
