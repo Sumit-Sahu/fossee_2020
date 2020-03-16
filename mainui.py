@@ -31,16 +31,16 @@ class Window(QMainWindow):
         Canvas.myMode = self.connectionTypeGroup.checkedId()
 
     def createActions(self):
-        self.addAction = QAction(QIcon('images/bringtofront.png'), "Add Circle", self)
+        self.addAction = QAction(QIcon('images/add.png'), "Add Circle", self)
         self.addAction.triggered.connect(self.addCircle)
 
-        self.deleteAction = QAction(QIcon('images/bringtofron.png'), "Delete circle", self)
+        self.deleteAction = QAction(QIcon('images/delete.png'), "Delete circle", self)
         self.deleteAction.triggered.connect(self.deleteCircle)
 
-        self.generateReportAction = QAction(QIcon('images/bringtofront.png'), "Generate Report", self)
+        self.generateReportAction = QAction(QIcon('images/report.gif'), "Generate Report", self)
         self.generateReportAction.triggered.connect(self.saveAsPdf)
 
-        self.saveAction = QAction(QIcon('images/bringtofront.png'), "Save", self)
+        self.saveAction = QAction(QIcon('images/image.png'), "Save", self)
         self.saveAction.triggered.connect(self.saveAsPng)
 
     def createToolbars(self):
