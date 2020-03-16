@@ -1,26 +1,13 @@
-import sys, random
+import sys
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtPrintSupport import QPrinter
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QFileDialog, QLineEdit, QGraphicsView, \
-    QMenu, QGraphicsScene, QGraphicsView, QGraphicsItem, QMenu, QGraphicsEllipseItem, QGraphicsLineItem, QAction, \
-    QToolButton, QButtonGroup
-from PyQt5.QtGui import QPainter, QPen, QImage, QPixmap, QStaticText, QColor, QCursor, QBrush, QIcon, QTransform
-from PyQt5.QtCore import Qt, QRect, QRectF, QPoint, QPointF, QLineF
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsView, QAction, QToolButton, \
+    QButtonGroup, QMessageBox
+from PyQt5.QtCore import QRectF, QFileInfo
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-
-
-
+from canvas import Canvas
 from circle import Circle
 from connectingline import ConnectingLine
-
-
-class CanvasScene(QGraphicsScene):
-
-    def __init__(self, parent=None):
-        QGraphicsScene.__init__(self, parent)
 
 
 class Window(QMainWindow):
@@ -32,7 +19,7 @@ class Window(QMainWindow):
     def InitWindow(self):
         self.setWindowTitle(self.title)
 
-        self.scene = CanvasScene()
+        self.scene = Canvas()
         self.scene.setSceneRect(QRectF(0, 0, 1000, 1000))
         self.createActions()
         self.createToolbars()
@@ -40,25 +27,26 @@ class Window(QMainWindow):
         self.view = QGraphicsView(self.scene)
         self.setCentralWidget(self.view)
 
-    def pointerGroupClicked(self, i):
-        Circle.myMode = self.connectionTypeGroup.checkedId()
+    def pointerGroupClicked(self):
+        Canvas.myMode = self.connectionTypeGroup.checkedId()
 
     def createActions(self):
-        self.addAction = QAction(QIcon('images/bringtofront.png'),
-                                 "Add", self, shortcut="Ctrl+N")
-        self.addAction.triggered.connect(self.drawCircle)
+        self.addAction = QAction(QIcon('images/bringtofront.png'), "Add Circle", self)
+        self.addAction.triggered.connect(self.addCircle)
 
-        self.generateReportAction = QAction(QIcon('images/bringtofront.png'),
-                                            "Generate Report", self, shortcut="Ctrl+G")
+        self.deleteAction = QAction(QIcon('images/bringtofron.png'), "Delete circle", self)
+        self.deleteAction.triggered.connect(self.deleteCircle)
+
+        self.generateReportAction = QAction(QIcon('images/bringtofront.png'), "Generate Report", self)
         self.generateReportAction.triggered.connect(self.saveAsPdf)
 
-        self.saveAction = QAction(QIcon('images/bringtofront.png'),
-                                  "Save", self, shortcut="Ctrl+G")
+        self.saveAction = QAction(QIcon('images/bringtofront.png'), "Save", self)
         self.saveAction.triggered.connect(self.saveAsPng)
 
     def createToolbars(self):
         self.editToolBar = self.addToolBar("Edit")
         self.editToolBar.addAction(self.addAction)
+        self.editToolBar.addAction(self.deleteAction)
         self.editToolBar.addAction(self.generateReportAction)
         self.editToolBar.addAction(self.saveAction)
 
@@ -71,29 +59,34 @@ class Window(QMainWindow):
         linePointerButton.setIcon(QIcon('images/linepointer.png'))
 
         self.connectionTypeGroup = QButtonGroup()
-        self.connectionTypeGroup.addButton(pointerButton, Circle.MoveItem)
-        self.connectionTypeGroup.addButton(linePointerButton, Circle.InsertLine)
+        self.connectionTypeGroup.addButton(pointerButton, Canvas.MoveItem)
+        self.connectionTypeGroup.addButton(linePointerButton, Canvas.InsertLine)
         self.connectionTypeGroup.buttonClicked[int].connect(self.pointerGroupClicked)
 
         self.lineToolbar = self.addToolBar("Pointer type")
         self.lineToolbar.addWidget(linePointerButton)
         self.lineToolbar.addWidget(pointerButton)
 
-    def drawCircle(self):
+    def addCircle(self):
         circle = Circle()
         circle.addOnCanvas(self.scene)
+
+    def deleteCircle(self):
+        circles = self.scene.selectedItems()
+        for circle in circles:
+            circle.removeFromCanvas()
 
     def saveAsPng(self):
         try:
             fileName, _ = QFileDialog.getSaveFileName(self, 'Save file', "image.png", '*.png')
             if not fileName:
                 return
-            if QFileInfo(fileName).suffix() != '.png':  # check if user type other extension with name
+            if QFileInfo(fileName).suffix() != 'png':  # check if user type other extension with name
                 fileName += '.png'
             pixmap = self.view.grab()
             pixmap.save(fileName, 'PNG')
         except:
-            QMessageBox.information(self,'Error','Image not saved')
+            QMessageBox.information(self, 'Error', 'Image not saved')
 
     def saveAsPdf(self):
         try:
@@ -104,16 +97,14 @@ class Window(QMainWindow):
 
         except:
             QMessageBox.information(self, 'Alert', 'Process Declined \n import reportlab')
-
-
+            return
 
         items = self.scene.items()
         fileName, _ = QFileDialog.getSaveFileName(self, directory='file.pdf',
                                                   filter='PDF Files *.pdf(*.pdf);;All Files *(*)')
         if not fileName:
             return
-        print(QFileInfo(fileName).suffix())
-        if QFileInfo(fileName).suffix() != 'pdf':                                            # check if user type other extension with name
+        if QFileInfo(fileName).suffix() != 'pdf':  # check if user type other extension with name
             fileName += '.pdf'
 
         canvas = Canvas(fileName, pagesize=A4)
@@ -123,24 +114,28 @@ class Window(QMainWindow):
         canvas.setFillColor(blue)
         size = 20
         y = 10 * inch
-        x = 2 * inch
+        x = 1.5 * inch
         line = 1
+        count = 1
         for item in items:
             if type(item) == ConnectingLine:
                 connectionLine = item.textLabel.text()
                 startCircle = item.getStartCircle().textLabel.text()
                 endCircle = item.getEndCircle().textLabel.text()
-                str = "{}:({},{})".format(connectionLine, startCircle, endCircle)
+                string = "{}:({},{})".format(connectionLine, startCircle, endCircle)
 
-                if line > 20:
+                if count > 20:
                     canvas.showPage()
-                    line = 4
-                    size = 7
-                    y = 10 * inch
-                    x = 2 * inch
+                    canvas.setFillColor(blue)
+                    size = 20
+                    y = 11 * inch
+                    x = 1.5 * inch
+                    count = 1
 
                 canvas.setFont("Helvetica", size)
-                canvas.drawString(x, y, str)
+                canvas.drawString(1*inch, y, str(line)+'.')
+                canvas.drawString(x, y, string)
+                count += 1
                 line += 1
                 y = y - size * 2
 
@@ -151,12 +146,11 @@ class Window(QMainWindow):
                                                    'first close file {}'.format(fileName))
 
 
-def main():
-    App = QApplication(sys.argv)
-    window = Window()
-    window.show()
-    sys.exit(App.exec())
-
-
 if __name__ == "__main__":
-    main()
+    try:
+        app = QApplication(sys.argv)
+        application = Window()
+        application.show()
+        sys.exit(app.exec())
+    except Exception as e:
+        print(e)
