@@ -1,13 +1,9 @@
-import sys
-
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QGraphicsPathItem, QGraphicsLineItem, QApplication, QGraphicsView, QGraphicsScene, \
-    QLineEdit, QGraphicsProxyWidget
-from PyQt5.QtCore import Qt, QLine, pyqtSignal, QPoint, QPointF, QRectF
+from PyQt5.QtGui import QFont, QPen
+from PyQt5.QtWidgets import QGraphicsLineItem, QLineEdit, QGraphicsProxyWidget
+from PyQt5.QtCore import Qt, QPointF, QRectF
 
 
 class ConnectingLine(QGraphicsLineItem):
-    # updateLine = pyqtSignal(QPointF)
 
     def __init__(self, startPoint, endPoint, parent=None):
         QGraphicsLineItem.__init__(self, startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y(), parent=parent)
@@ -19,6 +15,9 @@ class ConnectingLine(QGraphicsLineItem):
         self.textLabelProxy = QGraphicsProxyWidget()
         self.textLabelProxy.setWidget(self.textLabel)
         self.textLabelProxy.setParentItem(self)
+        self.textLabel.setStyleSheet(
+            "border: 1px solid black; color:black; selection-color:yellow; selection-background-color:green;")
+        self.textLabel.setFont(QFont('Times New Roman', 12))
 
         self.setPen(QPen(Qt.black, 4, Qt.SolidLine))
 
@@ -48,8 +47,19 @@ class ConnectingLine(QGraphicsLineItem):
         self.setLine(self.startPoint.x(), self.startPoint.y(), self.endPoint.x(), self.endPoint.y())
         self.textLabelProxy.setGeometry(QRectF(self.boundingRect().x() + self.boundingRect().width() / 2,
                                                self.boundingRect().y() + self.boundingRect().height() / 2,
-                                               50, 20))
+                                               60, 20))
 
     def addOnCanvas(self, scene):
         scene.addItem(self)
         scene.addItem(self.textLabelProxy)
+
+    def removeFromCanvas(self):
+        try:
+            self.startCircle.removeConnection(self.endCircle)
+            self.endCircle.removeConnection(self.startCircle)
+        except Exception as e:
+            pass
+        finally:
+            self.scene().removeItem(self)
+
+
