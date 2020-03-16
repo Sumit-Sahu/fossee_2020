@@ -60,6 +60,4 @@ class ConnectingLine(QGraphicsLineItem):
         except Exception as e:
             pass
         finally:
-            self.scene().removeItem(self)
-
-
+            self.scene().removeItem(se
