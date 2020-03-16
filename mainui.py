@@ -14,7 +14,7 @@ from connectingline import ConnectingLine
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.title = "Create Circles"
+        self.setWindowTitle("Connecting Circles")
         style = open('themes/light.css', 'r')
         style = style.read()
         self.setStyleSheet(style)
