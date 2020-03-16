@@ -10,6 +10,7 @@ yaksh.fossee.in<br/>
 2. Required packages :- <br/>
    - [PyQt5](https://pypi.org/project/PyQt5/)<br/>
    - [reportlab](https://pypi.org/project/reportlab/)
+3. to download requirements `pip3 install -r requirements.txt`
 
 # Run :-
 Run this application by following instructions:-
@@ -20,3 +21,18 @@ pip3 install -r requirements.txt
 python mainui.py
 ```
 3. Required application should run
+
+# Main Gui :-
+1.Toolbar<br/><br/>
+   - ![Toolbox](/exampleImages/toolbar.png)<br/>
+2.Sample<br/><br/>
+   - ![Toolbox](/exampleImages/sample.png)<br/>
+3.Popup Menu<br/><br/>
+   - ![Toolbox](/exampleImages/popup.png)<br/>
+
+# Main Features of Project
+1. Add random color circle on Cnavas.
+2. Delete multiple circle at a time.
+3. Add connection between circles.
+4. Can add multiple connection to a circle at a time.
+
