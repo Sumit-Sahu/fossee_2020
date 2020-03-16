@@ -9,9 +9,7 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 class Circle(QGraphicsEllipseItem):
     radius = 50
 
-    def __init__(self, parent=None):
-        position = QtCore.QPoint(*random.choices(range(800), k=2))
-        x_coordinate, y_coordinate = position.x(), position.y()
+    def __init__(self, x_coordinate, y_coordinate, parent=None):
         QGraphicsEllipseItem.__init__(self, QRectF(x_coordinate, y_coordinate, 2 * Circle.radius, 2 * Circle.radius),
                                       parent=parent)
         self.setZValue(1)

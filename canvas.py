@@ -29,7 +29,8 @@ class Canvas(QGraphicsScene):
             for item in circle:
                 self.removeItem(item)
         if action == quitAction:
-            self.window().close()
+            for view in self.views():
+                view.window().close()
 
     def clearAllConnection(self):
         items = self.items()
@@ -70,7 +71,7 @@ class Canvas(QGraphicsScene):
 
     def mouseReleaseEvent(self, mouseEvent):
         if Canvas.myMode == Canvas.InsertLine and self.lines:
-            item = self.itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), Circle().transform())
+            item = self.itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), Circle(0,0).transform())
             lines = self.lines
             circles = self.circles
             if type(item) == Circle:
