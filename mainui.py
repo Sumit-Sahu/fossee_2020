@@ -23,6 +23,7 @@ class Window(QMainWindow):
     def InitWindow(self):
         self.createActions()
         self.createToolbars()
+        self.SetShortcuts()
 
         desktop = app.desktop()
         self.scene = Canvas()
@@ -33,9 +34,16 @@ class Window(QMainWindow):
         self.setCentralWidget(self.view)
 
     def pointerGroupClicked(self):
+        """Toggle between pointer
+        and line pointer
+        """
         Canvas.myMode = self.connectionTypeGroup.checkedId()
 
     def createActions(self):
+        """This function is used to create
+            action for toolbar button
+        :return:
+        """
         self.addAction = QAction(QIcon('images/add.png'), "Add Circle", self)
         self.addAction.triggered.connect(self.addCircle)
 
@@ -82,7 +90,19 @@ class Window(QMainWindow):
         self.lineToolbar.addWidget(pointerButton)
         self.lineToolbar.setMovable(False)
 
+    def SetShortcuts(self):
+        """This function is used to set keyboard shortcuts to
+            important operations
+        """
+        self.addAction.setShortcut("Ctrl+N")
+        self.deleteAction.setShortcut("Ctrl+V")
+        self.generateReportAction.setShortcut("Ctrl+F")
+        self.saveAction.setShortcut("Ctrl+S")
+
     def addCircle(self):
+        """This function is used to add circle to canvas
+        :return:
+        """
         start = self.scene.sceneRect().x() + self.editToolBar.width()
         end = self.scene.sceneRect().width()
         x_coordinate = randint(start, end)
@@ -93,11 +113,17 @@ class Window(QMainWindow):
         circle.addOnCanvas(self.scene)
 
     def deleteCircle(self):
+        """This function is used to delete all selected circle
+        :return:
+        """
         circles = self.scene.selectedItems()
         for circle in circles:
             circle.removeFromCanvas()
 
     def saveAsPng(self):
+        """This function is used to save the canvas image as png
+        :return:
+        """
         try:
             fileName, _ = QFileDialog.getSaveFileName(self, 'Save file', "image.png", '*.png')
             if not fileName:
@@ -110,6 +136,9 @@ class Window(QMainWindow):
             QMessageBox.information(self, 'Error', 'Image not saved')
 
     def saveAsPdf(self):
+        """This function is used to generate pdf of all connection
+        :return:
+        """
         try:
             from reportlab.pdfgen.canvas import Canvas
             from reportlab.lib.pagesizes import A4
