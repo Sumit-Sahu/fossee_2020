@@ -1,9 +1,10 @@
 import sys
+from random import randint, random
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsView, QAction, QToolButton, \
-    QButtonGroup, QMessageBox
-from PyQt5.QtCore import QRectF, QFileInfo
+    QButtonGroup, QMessageBox, QLayout, QVBoxLayout, QLabel
+from PyQt5.QtCore import QRectF, QFileInfo, QPoint, QRect, QSize
 
 from canvas import Canvas
 from circle import Circle
@@ -17,14 +18,15 @@ class Window(QMainWindow):
         self.InitWindow()
 
     def InitWindow(self):
-        self.setWindowTitle(self.title)
-
-        self.scene = Canvas()
-        self.scene.setSceneRect(QRectF(0, 0, 1000, 1000))
         self.createActions()
         self.createToolbars()
 
-        self.view = QGraphicsView(self.scene)
+        desktop = app.desktop()
+        self.scene = Canvas()
+        self.scene.setSceneRect(0, 0, desktop.width(), desktop.height()-self.editToolBar.height())
+
+        self.view = QGraphicsView()
+        self.view.setScene(self.scene)
         self.setCentralWidget(self.view)
 
     def pointerGroupClicked(self):
@@ -45,10 +47,14 @@ class Window(QMainWindow):
 
     def createToolbars(self):
         self.editToolBar = self.addToolBar("Edit")
+        self.editToolBar.setFixedHeight(100)
+        self.editToolBar.setIconSize(QSize(50,50))
         self.editToolBar.addAction(self.addAction)
         self.editToolBar.addAction(self.deleteAction)
         self.editToolBar.addAction(self.generateReportAction)
         self.editToolBar.addAction(self.saveAction)
+        self.editToolBar.setMovable(False)
+        
 
         pointerButton = QToolButton()
         pointerButton.setCheckable(True)
@@ -64,11 +70,20 @@ class Window(QMainWindow):
         self.connectionTypeGroup.buttonClicked[int].connect(self.pointerGroupClicked)
 
         self.lineToolbar = self.addToolBar("Pointer type")
+        self.lineToolbar.setFixedHeight(100)
+        self.lineToolbar.setIconSize(QSize(50, 50))
         self.lineToolbar.addWidget(linePointerButton)
         self.lineToolbar.addWidget(pointerButton)
+        self.lineToolbar.setMovable(False)
 
     def addCircle(self):
-        circle = Circle()
+        start = self.scene.sceneRect().x()
+        end = self.scene.sceneRect().width()
+        x_coordinate = randint(start, end)
+        start = self.scene.sceneRect().y()+self.editToolBar.height()
+        end = self.scene.sceneRect().height()
+        y_coordinate = randint(start, end)
+        circle = Circle(x_coordinate, y_coordinate)
         circle.addOnCanvas(self.scene)
 
     def deleteCircle(self):
@@ -133,7 +148,7 @@ class Window(QMainWindow):
                     count = 1
 
                 canvas.setFont("Helvetica", size)
-                canvas.drawString(1*inch, y, str(line)+'.')
+                canvas.drawString(1 * inch, y, str(line) + '.')
                 canvas.drawString(x, y, string)
                 count += 1
                 line += 1
@@ -150,7 +165,7 @@ if __name__ == "__main__":
     try:
         app = QApplication(sys.argv)
         application = Window()
-        application.show()
+        application.showMaximized()
         sys.exit(app.exec())
     except Exception as e:
         print(e)
