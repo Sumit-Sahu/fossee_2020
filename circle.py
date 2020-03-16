@@ -26,23 +26,35 @@ class Circle(QGraphicsEllipseItem):
                       QGraphicsItem.ItemIsSelectable)
         self.connectedCircle = {}
 
-    def setMode(self, mode):
-        Circle.myMode = mode
-
     def getLines(self):
+        """All lines connected to circle
+        :return: list of lines
+        """
         return self.connectedCircle.values()
 
     def addConnection(self, circle, line):
+        """Add connection with circle
+        :return:
+        """
         self.connectedCircle[circle] = line
 
     def removeConnection(self, circle):
+        """Remove connection with circle
+        :return:
+        """
         del self.connectedCircle[circle]
 
     def getCenter(self):
+        """This function is used to calculate current center of circle
+        :return: center of circle
+        """
         return QPointF(self.sceneBoundingRect().x() + self.sceneBoundingRect().width() / 2.0,
                        self.sceneBoundingRect().y() + self.sceneBoundingRect().height() / 2.0)
 
     def addOnCanvas(self, scene):
+        """This function is used to add circle on canvas with creating label
+        :return:
+        """
         scene.addItem(self)
         scene.addItem(self.textLabelProxy)
         self.textLabelProxy.setGeometry(QRectF(self.rect().x() + self.rect().width() / 4,
@@ -50,6 +62,9 @@ class Circle(QGraphicsEllipseItem):
                                                60, 22))
 
     def removeFromCanvas(self):
+        """This function is used to remove circle from canvas
+        :return:
+        """
         for circle, line in self.connectedCircle.items():
             self.scene().removeItem(line)
             circle.removeConnection(self)

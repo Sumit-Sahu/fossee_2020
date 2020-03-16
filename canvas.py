@@ -15,9 +15,15 @@ class Canvas(QGraphicsScene):
         self.circles = []
 
     def setMode(self, mode):
+        """This function is used to toggle between move and add line
+        :return:
+        """
         Canvas.myMode = mode
 
     def contextMenuEvent(self, event):
+        """Pop up menu
+        :return:
+        """
         contextMenu = QMenu()
         deleteCircleAction = contextMenu.addAction("Delete All Circle")
         clearConnectionAction = contextMenu.addAction("Delete All Connection")
@@ -33,6 +39,9 @@ class Canvas(QGraphicsScene):
                 view.window().close()
 
     def clearAllConnection(self):
+        """This function is used to clear all connection lines
+        :return:
+        """
         items = self.items()
         for item in items:
             if type(item) == ConnectingLine:
@@ -71,7 +80,8 @@ class Canvas(QGraphicsScene):
 
     def mouseReleaseEvent(self, mouseEvent):
         if Canvas.myMode == Canvas.InsertLine and self.lines:
-            item = self.itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(), Circle(0,0).transform())
+            item = self.itemAt(mouseEvent.scenePos().x(), mouseEvent.scenePos().y(),
+                               Circle(0,0).transform())
             lines = self.lines
             circles = self.circles
             if type(item) == Circle:
